@@ -318,6 +318,23 @@ namespace GodotTools.Build
             return buildInfo;
         }
 
+        private static BuildInfo CreatePublishBuildInfo(
+            string configuration,
+            string platform,
+            string runtimeIdentifier,
+            string publishOutputDir,
+            string exportConstants,
+            bool includeDebugSymbols = true
+        )
+        {
+            var buildInfo = CreatePublishBuildInfo(configuration, platform, runtimeIdentifier, publishOutputDir, includeDebugSymbols);
+
+            if (exportConstants != null && exportConstants.Length > 0)
+                buildInfo.CustomProperties.Add($"GodotExportConstants={string.Join("%3B", SanitizeConstants(exportConstants))}");
+
+            return buildInfo;
+        }
+
         public static bool BuildProjectBlocking(
             string configuration,
             string? platform = null,
@@ -337,6 +354,16 @@ namespace GodotTools.Build
             bool includeDebugSymbols = true
         ) => PublishProjectBlocking(CreatePublishBuildInfo(configuration,
             platform, runtimeIdentifier, publishOutputDir, includeDebugSymbols));
+
+        public static bool PublishProjectBlocking(
+            string configuration,
+            string platform,
+            string runtimeIdentifier,
+            string publishOutputDir,
+            string exportConstants,
+            bool includeDebugSymbols = true
+        ) => PublishProjectBlocking(CreatePublishBuildInfo(configuration,
+            platform, runtimeIdentifier, publishOutputDir, exportConstants, includeDebugSymbols));
 
         public static bool GenerateXCFrameworkBlocking(
             List<string> outputPaths,
@@ -386,6 +413,25 @@ namespace GodotTools.Build
                 return true; // Requested play from an external editor/IDE which already built the project.
 
             return BuildProjectBlocking("Debug");
+        }
+
+        private static List<string> SanitizeFeatures(string features)
+        {
+            var sanitizedFeatures = new List<string>();
+            foreach (string feature in features.Replace(" ", "").Replace("-", "_").Split(";"))
+            {
+                if (string.IsNullOrWhiteSpace(feature))
+                    continue;
+
+                string sanitizedFeature = feature.ToUpperInvariant()
+                                                 .Replace("-", "_")
+                                                 .Replace(" ", "_")
+                                                 .Replace(";", "_");
+
+                sanitizedFeatures.Add(sanitizedFeature);
+            }
+
+            return sanitizedFeatures;
         }
 
         public static void Initialize()

@@ -71,6 +71,17 @@ namespace GodotTools.Export
                         }
                     },
                     { "default_value", false }
+                },
+                new Godot.Collections.Dictionary()
+                {
+                    {
+                        "option", new Godot.Collections.Dictionary()
+                        {
+                            { "name", "dotnet/export_constants" },
+                            { "type", (int)Variant.Type.String }
+                        }
+                    },
+                    { "default_value", string.Empty }
                 }
             };
         }
@@ -248,9 +259,11 @@ namespace GodotTools.Export
                     if (!Directory.Exists(publishOutputDir))
                         Directory.CreateDirectory(publishOutputDir);
 
+                    var dotnetExportConstants = (string)GetOption("dotnet/export_constants");
+
                     // Execute dotnet publish.
                     if (!BuildManager.PublishProjectBlocking(buildConfig, platform,
-                            runtimeIdentifier, publishOutputDir, includeDebugSymbols))
+                            runtimeIdentifier, publishOutputDir, dotnetExportConstants, includeDebugSymbols))
                     {
                         throw new InvalidOperationException("Failed to build project.");
                     }
