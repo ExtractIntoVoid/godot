@@ -415,23 +415,23 @@ namespace GodotTools.Build
             return BuildProjectBlocking("Debug");
         }
 
-        private static List<string> SanitizeFeatures(string features)
+        private static List<string> SanitizeConstants(string exportConstants)
         {
-            var sanitizedFeatures = new List<string>();
-            foreach (string feature in features.Replace(" ", "").Replace("-", "_").Split(";"))
+            var sanitized = new List<string>();
+            foreach (string exportConstant in exportConstants.Replace(" ", "").Replace("-", "_").Split(";"))
             {
-                if (string.IsNullOrWhiteSpace(feature))
+                if (string.IsNullOrWhiteSpace(exportConstant))
                     continue;
 
-                string sanitizedFeature = feature.ToUpperInvariant()
+                string sanitizedexportConstant = exportConstant.ToUpperInvariant()
                                                  .Replace("-", "_")
                                                  .Replace(" ", "_")
                                                  .Replace(";", "_");
 
-                sanitizedFeatures.Add(sanitizedFeature);
+                sanitized.Add(sanitizedexportConstant);
             }
 
-            return sanitizedFeatures;
+            return sanitized;
         }
 
         public static void Initialize()
