@@ -1,9 +1,9 @@
 import os
 import sys
-from methods import print_error, detect_darwin_sdk_path, get_compiler_version, is_vanilla_clang
-from platform_methods import detect_arch, detect_mvk
-
 from typing import TYPE_CHECKING
+
+from methods import detect_darwin_sdk_path, get_compiler_version, is_vanilla_clang, print_error
+from platform_methods import detect_arch, detect_mvk
 
 if TYPE_CHECKING:
     from SCons.Script.SConscript import SConsEnvironment
@@ -53,11 +53,11 @@ def get_doc_path():
 
 
 def get_flags():
-    return [
-        ("arch", detect_arch()),
-        ("use_volk", False),
-        ("supported", ["mono"]),
-    ]
+    return {
+        "arch": detect_arch(),
+        "use_volk": False,
+        "supported": ["mono"],
+    }
 
 
 def configure(env: "SConsEnvironment"):
@@ -96,6 +96,8 @@ def configure(env: "SConsEnvironment"):
         env.Append(CCFLAGS=["-arch", "x86_64", "-mmacosx-version-min=10.13"])
         env.Append(LINKFLAGS=["-arch", "x86_64", "-mmacosx-version-min=10.13"])
 
+    env.Append(CCFLAGS=["-ffp-contract=off"])
+
     cc_version = get_compiler_version(env)
     cc_version_major = cc_version["apple_major"]
     cc_version_minor = cc_version["apple_minor"]
@@ -107,7 +109,7 @@ def configure(env: "SConsEnvironment"):
 
     env.Append(CCFLAGS=["-fobjc-arc"])
 
-    if not "osxcross" in env:  # regular native build
+    if "osxcross" not in env:  # regular native build
         if env["macports_clang"] != "no":
             mpprefix = os.environ.get("MACPORTS_PREFIX", "/opt/local")
             mpclangver = env["macports_clang"]
